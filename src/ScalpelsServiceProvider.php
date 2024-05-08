@@ -1,12 +1,13 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace ArtisanBuild\Scalpels;
 
+use ArtisanBuild\Scalpels\Commands\BuildSiteCommand;
+use ArtisanBuild\Scalpels\Commands\ScalpelsCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class ScalpelsServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +17,11 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('scalpels')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_skeleton_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_scalpels_table')
+            ->hasCommand(ScalpelsCommand::class)
+            ->hasCommand(BuildSiteCommand::class);
     }
 }
