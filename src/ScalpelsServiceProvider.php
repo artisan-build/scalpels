@@ -2,6 +2,7 @@
 
 namespace ArtisanBuild\Scalpels;
 
+use ArtisanBuild\Scalpels\Commands\BuildCodeCoverageHtml;
 use ArtisanBuild\Scalpels\Commands\BuildSiteCommand;
 use ArtisanBuild\Scalpels\Commands\ScalpelsCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -22,6 +23,7 @@ class ScalpelsServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasMigration('create_scalpels_table')
             ->hasCommand(ScalpelsCommand::class)
+            ->hasCommand(BuildCodeCoverageHtml::class)
             ->hasCommand(BuildSiteCommand::class);
     }
 }
