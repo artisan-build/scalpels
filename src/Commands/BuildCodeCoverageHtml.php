@@ -7,7 +7,6 @@ use SebastianBergmann\CodeCoverage\Report\Html\Facade as HtmlReport;
 
 class BuildCodeCoverageHtml extends Command
 {
-
     public $signature = 'build:code-coverage-html';
 
     public $description = 'Generate a code coverage HTML file';
