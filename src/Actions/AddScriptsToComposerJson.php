@@ -2,11 +2,14 @@
 
 namespace ArtisanBuild\Scalpels\Actions;
 
+use ArtisanBuild\Support\CurrentEnvironment\ReadComposer;
+use ArtisanBuild\Support\CurrentEnvironment\WriteComposer;
+
 class AddScriptsToComposerJson
 {
     public function __invoke()
     {
-        $json = json_decode(file_get_contents(base_path('composer.json')), true);
+        $json = app(ReadComposer::class);
 
         $scripts = collect($json['scripts']);
 
@@ -40,7 +43,7 @@ class AddScriptsToComposerJson
 
         $json['scripts'] = $scripts->toArray();
 
-        file_put_contents(base_path('composer.json'), json_encode($json, JSON_PRETTY_PRINT));
+        app(WriteComposer::class)($json);
 
     }
 }
