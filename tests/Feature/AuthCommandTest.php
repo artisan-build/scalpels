@@ -7,42 +7,22 @@ use ArtisanBuild\Scalpels\Support\TokenManager;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
-beforeEach(function () {
-    // Configure Scalpels
-    config(['scalpels.url' => 'https://test.scalpels.app']);
-    config(['scalpels.project_id' => '550e8400-e29b-41d4-a716-446655440000']);
-
-    // Use temporary directory for token storage
-    $this->tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
-    mkdir($this->tempDir);
-
-    $this->app->singleton(TokenManager::class, function () {
-        return new TokenManager($this->tempDir);
-    });
-});
-
-afterEach(function () {
-    // Cleanup temp directory
-    if (is_dir($this->tempDir)) {
-        array_map('unlink', glob("{$this->tempDir}/.scalpels/*"));
-        if (is_dir("{$this->tempDir}/.scalpels")) {
-            rmdir("{$this->tempDir}/.scalpels");
-        }
-        rmdir($this->tempDir);
-    }
-});
-
-test('auth command requires configuration', function () {
+test('auth command requires configuration', function (): void {
     // Clear configuration
-    config(['scalpels.url' => null]);
-    config(['scalpels.project_id' => null]);
+    app('config')->set('scalpels.url', null);
+    app('config')->set('scalpels.project_id', null);
 
     $this->artisan('scalpels:auth')
         ->assertFailed()
         ->expectsOutputToContain('Scalpels not configured');
 });
 
-test('auth command stores account token on success', function () {
+test('auth command stores account token on success', function (): void {
+    // Setup TokenManager with temp directory
+    $tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
+    mkdir($tempDir);
+    app()->singleton(TokenManager::class, fn (): TokenManager => new TokenManager($tempDir));
+
     // Mock successful authentication response
     $mockClient = new MockClient([
         MockResponse::make([
@@ -55,7 +35,7 @@ test('auth command stores account token on success', function () {
         ], 201),
     ]);
 
-    $connector = $this->app->make(ScalpelsConnector::class);
+    $connector = app(ScalpelsConnector::class);
     $connector->withMockClient($mockClient);
 
     $this->artisan('scalpels:auth')
@@ -66,13 +46,24 @@ test('auth command stores account token on success', function () {
         ->expectsOutputToContain('Authentication successful!');
 
     // Verify token was stored
-    $tokenManager = $this->app->make(TokenManager::class);
+    $tokenManager = app(TokenManager::class);
     $tokenData = $tokenManager->getAccountToken('default');
     expect($tokenData)->not->toBeNull()
         ->and($tokenData['token'])->toBe('acc_abcdef1234567890abcdef1234567890');
+
+    // Cleanup
+    if (is_dir($tempDir)) {
+        array_map(unlink(...), glob("{$tempDir}/.scalpels/*") ?: []);
+        if (is_dir("{$tempDir}/.scalpels")) {
+            rmdir("{$tempDir}/.scalpels");
+        }
+        rmdir($tempDir);
+    }
 });
 
-test('auth command handles invalid credentials', function () {
+test('auth command handles invalid credentials', function (): void {
+    $setup = setupTempTokenManager();
+
     // Mock authentication failure
     $mockClient = new MockClient([
         MockResponse::make([
@@ -90,9 +81,13 @@ test('auth command handles invalid credentials', function () {
         ->expectsQuestion('Two-factor code (press Enter if not enabled)', '')
         ->assertFailed()
         ->expectsOutputToContain('Invalid credentials');
+
+    $setup['cleanup']();
 });
 
-test('auth command handles 2FA required error', function () {
+test('auth command handles 2FA required error', function (): void {
+    $setup = setupTempTokenManager();
+
     // Mock 2FA required response
     $mockClient = new MockClient([
         MockResponse::make([
@@ -111,9 +106,13 @@ test('auth command handles 2FA required error', function () {
         ->assertFailed()
         ->expectsOutputToContain('Two-factor authentication is required')
         ->expectsOutputToContain('https://test.scalpels.app/settings');
+
+    $setup['cleanup']();
 });
 
-test('auth command supports named accounts', function () {
+test('auth command supports named accounts', function (): void {
+    $setup = setupTempTokenManager();
+
     // Mock successful authentication
     $mockClient = new MockClient([
         MockResponse::make([
@@ -140,9 +139,13 @@ test('auth command supports named accounts', function () {
     $tokenData = $tokenManager->getAccountToken('client-two');
     expect($tokenData)->not->toBeNull()
         ->and($tokenData['token'])->toBe('acc_xyz789xyz789xyz789xyz789xyz789xyz');
+
+    $setup['cleanup']();
 });
 
-test('auth command supports expiration days option', function () {
+test('auth command supports expiration days option', function (): void {
+    $setup = setupTempTokenManager();
+
     // Mock successful authentication with expiration
     $mockClient = new MockClient([
         MockResponse::make([
@@ -164,4 +167,6 @@ test('auth command supports expiration days option', function () {
         ->expectsQuestion('Two-factor code (press Enter if not enabled)', '')
         ->assertSuccessful()
         ->expectsOutputToContain('Expires: 2025-12-26');
+
+    $setup['cleanup']();
 });

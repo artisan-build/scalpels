@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenRotationHandler;
+use Illuminate\Support\Facades\Log;
 use Saloon\Contracts\Response;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create temporary directory for .env files
     $this->tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
     mkdir($this->tempDir);
+
+    // Mock the Log facade
+    Log::spy();
 
     // Create ConfigManager mock
     $this->configManager = Mockery::mock(ConfigManager::class);
@@ -18,16 +22,16 @@ beforeEach(function () {
     $this->handler = new TokenRotationHandler($this->configManager);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Clean up
     if (is_dir($this->tempDir)) {
-        array_map('unlink', glob("{$this->tempDir}/*"));
+        array_map(unlink(...), glob("{$this->tempDir}/*"));
         @rmdir($this->tempDir);
     }
     Mockery::close();
 });
 
-test('detects token rotation metadata in response', function () {
+test('detects token rotation metadata in response', function (): void {
     // Create mock response data
     $responseData = [
         'data' => ['some' => 'data'],
@@ -54,7 +58,7 @@ test('detects token rotation metadata in response', function () {
     ($this->handler)($response);
 });
 
-test('does not update config when rotation not required', function () {
+test('does not update config when rotation not required', function (): void {
     $response = Mockery::mock(Response::class);
     $response->shouldReceive('json')->andReturn(['data' => ['some' => 'data']]);
 
@@ -64,7 +68,7 @@ test('does not update config when rotation not required', function () {
     ($this->handler)($response);
 });
 
-test('validates new token format', function () {
+test('validates new token format', function (): void {
     $responseData = [
         'data' => ['some' => 'data'],
         'meta' => [
@@ -84,7 +88,7 @@ test('validates new token format', function () {
     ($this->handler)($response);
 });
 
-test('validates new webhook secret format', function () {
+test('validates new webhook secret format', function (): void {
     $responseData = [
         'data' => ['some' => 'data'],
         'meta' => [
@@ -104,7 +108,7 @@ test('validates new webhook secret format', function () {
     ($this->handler)($response);
 });
 
-test('handles missing new_token gracefully', function () {
+test('handles missing new_token gracefully', function (): void {
     $responseData = [
         'data' => ['some' => 'data'],
         'meta' => [
@@ -121,7 +125,7 @@ test('handles missing new_token gracefully', function () {
     ($this->handler)($response);
 });
 
-test('handles missing new_webhook_secret gracefully', function () {
+test('handles missing new_webhook_secret gracefully', function (): void {
     $responseData = [
         'data' => ['some' => 'data'],
         'meta' => [
