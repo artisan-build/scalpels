@@ -36,7 +36,7 @@ test('connector injects Bearer token from TokenManager', function (): void {
         ->and($headers['Authorization'])->toBe('Bearer acc_test1234567890test1234567890te');
 });
 
-test('connector throws AuthenticationException when no token available', function (): void {
+test('connector returns empty headers when no token available', function (): void {
     $tokenManager = Mockery::mock(TokenManager::class);
     $tokenManager->shouldReceive('resolveToken')
         ->once()
@@ -48,8 +48,9 @@ test('connector throws AuthenticationException when no token available', functio
 
     $connector = new ScalpelsConnector($tokenManager, $handler);
 
-    expect(fn (): array => $connector->defaultHeaders())
-        ->toThrow(AuthenticationException::class);
+    $headers = $connector->defaultHeaders();
+
+    expect($headers)->toBe([]);
 });
 
 test('connector resolves base URL from config', function (): void {
