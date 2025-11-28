@@ -5,7 +5,7 @@ declare(strict_types=1);
 use ArtisanBuild\Scalpels\Exceptions\InvalidTokenException;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create temporary home directory for testing
     $this->tempHome = sys_get_temp_dir().'/scalpels-test-'.uniqid();
     mkdir($this->tempHome);
@@ -17,22 +17,22 @@ beforeEach(function () {
     config(['scalpels.service_token' => null]);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Clean up temporary directory
     if (is_dir($this->tempHome)) {
-        array_map('unlink', glob("{$this->tempHome}/.scalpels/*"));
+        array_map(unlink(...), glob("{$this->tempHome}/.scalpels/*"));
         @rmdir("{$this->tempHome}/.scalpels");
         @rmdir($this->tempHome);
     }
 });
 
-test('resolveToken returns service token when available', function () {
+test('resolveToken returns service token when available', function (): void {
     config(['scalpels.service_token' => 'svc_test123']);
 
     expect($this->tokenManager->resolveToken())->toBe('svc_test123');
 });
 
-test('resolveToken returns account token when service token not available', function () {
+test('resolveToken returns account token when service token not available', function (): void {
     config(['scalpels.service_token' => null]);
 
     // Store an account token
@@ -46,13 +46,13 @@ test('resolveToken returns account token when service token not available', func
     expect($this->tokenManager->resolveToken())->toBe('acc_test123');
 });
 
-test('resolveToken returns null when no tokens available', function () {
+test('resolveToken returns null when no tokens available', function (): void {
     config(['scalpels.service_token' => null]);
 
     expect($this->tokenManager->resolveToken())->toBeNull();
 });
 
-test('storeAccountToken validates token format', function () {
+test('storeAccountToken validates token format', function (): void {
     $this->tokenManager->storeAccountToken('default', [
         'account_token_id' => 1,
         'token' => 'invalid_token',
@@ -61,7 +61,7 @@ test('storeAccountToken validates token format', function () {
     ]);
 })->throws(InvalidTokenException::class, 'Account token must start with acc_');
 
-test('storeAccountToken creates file with 0600 permissions', function () {
+test('storeAccountToken creates file with 0600 permissions', function (): void {
     $this->tokenManager->storeAccountToken('default', [
         'account_token_id' => 1,
         'token' => 'acc_test123',
@@ -74,7 +74,7 @@ test('storeAccountToken creates file with 0600 permissions', function () {
         ->and(decoct(fileperms($filePath) & 0777))->toBe('600');
 });
 
-test('getAccountToken retrieves stored token', function () {
+test('getAccountToken retrieves stored token', function (): void {
     $tokenData = [
         'account_token_id' => 1,
         'token' => 'acc_test123',
@@ -88,7 +88,7 @@ test('getAccountToken retrieves stored token', function () {
     expect($retrieved)->toMatchArray($tokenData);
 });
 
-test('listAccounts returns all stored account names', function () {
+test('listAccounts returns all stored account names', function (): void {
     $this->tokenManager->storeAccountToken('default', [
         'account_token_id' => 1,
         'token' => 'acc_test123',
@@ -108,7 +108,7 @@ test('listAccounts returns all stored account names', function () {
         ->and($accounts)->toContain('default', 'client-two');
 });
 
-test('switchAccount updates current symlink', function () {
+test('switchAccount updates current symlink', function (): void {
     $this->tokenManager->storeAccountToken('default', [
         'account_token_id' => 1,
         'token' => 'acc_test123',

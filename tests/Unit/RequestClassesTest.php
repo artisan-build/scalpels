@@ -15,14 +15,14 @@ use Saloon\Enums\Method;
  *
  * Covers endpoint resolution and body formatting.
  */
-test('CreateAccountTokenRequest resolves correct endpoint', function () {
+test('CreateAccountTokenRequest resolves correct endpoint', function (): void {
     $request = new CreateAccountTokenRequest('test@example.com', 'password', '123456');
 
     expect($request->resolveEndpoint())->toBe('/api/v1/auth/account-tokens')
         ->and($request->getMethod())->toBe(Method::POST);
 });
 
-test('CreateAccountTokenRequest formats body correctly', function () {
+test('CreateAccountTokenRequest formats body correctly', function (): void {
     $request = new CreateAccountTokenRequest('test@example.com', 'password', '123456', 365);
 
     $body = $request->defaultBody();
@@ -35,21 +35,21 @@ test('CreateAccountTokenRequest formats body correctly', function () {
     ]);
 });
 
-test('RotateAccountTokenRequest resolves correct endpoint', function () {
+test('RotateAccountTokenRequest resolves correct endpoint', function (): void {
     $request = new RotateAccountTokenRequest;
 
     expect($request->resolveEndpoint())->toBe('/api/v1/auth/account-tokens/rotate')
         ->and($request->getMethod())->toBe(Method::POST);
 });
 
-test('RevokeAccountTokenRequest resolves correct endpoint with ID', function () {
+test('RevokeAccountTokenRequest resolves correct endpoint with ID', function (): void {
     $request = new RevokeAccountTokenRequest(123);
 
     expect($request->resolveEndpoint())->toBe('/api/v1/auth/account-tokens/123/revoke')
         ->and($request->getMethod())->toBe(Method::POST);
 });
 
-test('CreateServiceTokenRequest resolves correct endpoint', function () {
+test('CreateServiceTokenRequest resolves correct endpoint', function (): void {
     $request = new CreateServiceTokenRequest(
         'proj_abc123',
         'production',
@@ -61,7 +61,7 @@ test('CreateServiceTokenRequest resolves correct endpoint', function () {
         ->and($request->getMethod())->toBe(Method::POST);
 });
 
-test('CreateServiceTokenRequest formats body correctly', function () {
+test('CreateServiceTokenRequest formats body correctly', function (): void {
     $request = new CreateServiceTokenRequest(
         'proj_abc123',
         'production',

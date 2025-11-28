@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Use temporary .env files for testing
     $this->tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
     mkdir($this->tempDir);
@@ -17,12 +17,10 @@ beforeEach(function () {
     file_put_contents($this->envExamplePath, "APP_NAME=\n");
 
     // Bind ConfigManager with temp directory
-    $this->app->singleton(ConfigManager::class, function () {
-        return new ConfigManager($this->tempDir);
-    });
+    $this->app->singleton(ConfigManager::class, fn (): ConfigManager => new ConfigManager($this->tempDir));
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Cleanup temp directory
     if (is_dir($this->tempDir)) {
         $files = glob("{$this->tempDir}/*") ?: [];
@@ -41,7 +39,7 @@ afterEach(function () {
     }
 });
 
-test('install command validates URL format', function () {
+test('install command validates URL format', function (): void {
     $this->artisan('scalpels:install', [
         '--url' => 'http://example.com', // Invalid: not HTTPS
         '--project' => '550e8400-e29b-41d4-a716-446655440000',
@@ -50,7 +48,7 @@ test('install command validates URL format', function () {
         ->expectsOutputToContain('URL must use HTTPS protocol');
 });
 
-test('install command validates project UUID format', function () {
+test('install command validates project UUID format', function (): void {
     $this->artisan('scalpels:install', [
         '--url' => 'https://example.scalpels.app',
         '--project' => 'not-a-uuid', // Invalid UUID
@@ -59,7 +57,7 @@ test('install command validates project UUID format', function () {
         ->expectsOutputToContain('Project must be a valid UUID');
 });
 
-test('install command writes configuration to env files', function () {
+test('install command writes configuration to env files', function (): void {
     $url = 'https://example.scalpels.app';
     $project = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -80,7 +78,7 @@ test('install command writes configuration to env files', function () {
         ->and($envExampleContent)->toContain('SCALPELS_PROJECT=');
 });
 
-test('install command displays next steps', function () {
+test('install command displays next steps', function (): void {
     $this->artisan('scalpels:install', [
         '--url' => 'https://example.scalpels.app',
         '--project' => '550e8400-e29b-41d4-a716-446655440000',

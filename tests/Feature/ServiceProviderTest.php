@@ -6,7 +6,7 @@ use ArtisanBuild\Scalpels\Providers\ScalpelsServiceProvider;
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 
-test('service provider is discoverable via composer extra', function () {
+test('service provider is discoverable via composer extra', function (): void {
     $composerPath = __DIR__.'/../../composer.json';
 
     expect($composerPath)->toBeFile();
@@ -19,7 +19,7 @@ test('service provider is discoverable via composer extra', function () {
         ->toContain(ScalpelsServiceProvider::class);
 });
 
-test('service provider registers configuration file', function () {
+test('service provider registers configuration file', function (): void {
     expect(config('scalpels.url'))->toBeNull()
         ->and(config('scalpels.project_id'))->toBeNull()
         ->and(config('scalpels.service_token'))->toBeNull()
@@ -29,7 +29,7 @@ test('service provider registers configuration file', function () {
         ->and(config('scalpels.debug'))->toBeFalse();
 });
 
-test('service provider binds TokenManager as singleton', function () {
+test('service provider binds TokenManager as singleton', function (): void {
     $instance1 = app(TokenManager::class);
     $instance2 = app(TokenManager::class);
 
@@ -38,7 +38,7 @@ test('service provider binds TokenManager as singleton', function () {
         ->toBe($instance2);
 });
 
-test('service provider binds ConfigManager as singleton', function () {
+test('service provider binds ConfigManager as singleton', function (): void {
     $instance1 = app(ConfigManager::class);
     $instance2 = app(ConfigManager::class);
 
@@ -47,6 +47,6 @@ test('service provider binds ConfigManager as singleton', function () {
         ->toBe($instance2);
 });
 
-test('package namespace resolves correctly', function () {
+test('package namespace resolves correctly', function (): void {
     expect(class_exists(ScalpelsServiceProvider::class))->toBeTrue();
 });

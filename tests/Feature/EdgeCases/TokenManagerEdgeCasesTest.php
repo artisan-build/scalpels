@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use ArtisanBuild\Scalpels\Support\TokenManager;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->tempDir = sys_get_temp_dir().'/scalpels-edge-'.uniqid();
     mkdir($this->tempDir);
     $this->tokenManager = new TokenManager($this->tempDir);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     if (is_dir($this->tempDir)) {
         $files = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($this->tempDir, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -26,7 +26,7 @@ afterEach(function () {
     }
 });
 
-test('getAccountToken returns null for corrupted JSON file', function () {
+test('getAccountToken returns null for corrupted JSON file', function (): void {
     // Create .scalpels directory
     $scalpelsDir = "{$this->tempDir}/.scalpels";
     mkdir($scalpelsDir, 0700, true);
@@ -39,7 +39,7 @@ test('getAccountToken returns null for corrupted JSON file', function () {
     expect($result)->toBeNull();
 });
 
-test('storeAccountToken handles directory creation failure gracefully', function () {
+test('storeAccountToken handles directory creation failure gracefully', function (): void {
     // Create a file where the directory should be (prevents mkdir)
     touch("{$this->tempDir}/.scalpels");
 
@@ -52,7 +52,7 @@ test('storeAccountToken handles directory creation failure gracefully', function
     ]))->toThrow(Exception::class);
 });
 
-test('switchAccount handles missing symlink directory', function () {
+test('switchAccount handles missing symlink directory', function (): void {
     // Store an account
     $this->tokenManager->storeAccountToken('test', [
         'token' => 'acc_test123test123test123test123test',
@@ -76,17 +76,17 @@ test('switchAccount handles missing symlink directory', function () {
         ->not->toThrow(Exception::class);
 });
 
-test('listAccounts returns empty array when .scalpels directory does not exist', function () {
+test('listAccounts returns empty array when .scalpels directory does not exist', function (): void {
     $result = $this->tokenManager->listAccounts();
     expect($result)->toBe([]);
 });
 
-test('getCurrentAccount returns null when current symlink does not exist', function () {
+test('getCurrentAccount returns null when current symlink does not exist', function (): void {
     $result = $this->tokenManager->getCurrentAccount();
     expect($result)->toBeNull();
 });
 
-test('deleteAccount handles non-existent account gracefully', function () {
+test('deleteAccount handles non-existent account gracefully', function (): void {
     // Should not throw exception
     expect(fn () => $this->tokenManager->deleteAccount('nonexistent'))
         ->not->toThrow(Exception::class);

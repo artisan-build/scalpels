@@ -7,7 +7,7 @@ use ArtisanBuild\Scalpels\Support\TokenManager;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Configure Scalpels
     config(['scalpels.url' => 'https://test.scalpels.app']);
     config(['scalpels.project_id' => '550e8400-e29b-41d4-a716-446655440000']);
@@ -16,9 +16,7 @@ beforeEach(function () {
     $this->tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
     mkdir($this->tempDir);
 
-    $this->app->singleton(TokenManager::class, function () {
-        return new TokenManager($this->tempDir);
-    });
+    $this->app->singleton(TokenManager::class, fn (): TokenManager => new TokenManager($this->tempDir));
 
     // Store account token for authentication
     $tokenManager = $this->app->make(TokenManager::class);
@@ -30,10 +28,10 @@ beforeEach(function () {
     ]);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Cleanup temp directory
     if (is_dir($this->tempDir)) {
-        array_map('unlink', glob("{$this->tempDir}/.scalpels/*"));
+        array_map(unlink(...), glob("{$this->tempDir}/.scalpels/*"));
         if (is_dir("{$this->tempDir}/.scalpels")) {
             rmdir("{$this->tempDir}/.scalpels");
         }
@@ -41,7 +39,7 @@ afterEach(function () {
     }
 });
 
-test('generate service token command creates token successfully', function () {
+test('generate service token command creates token successfully', function (): void {
     // Mock successful service token creation
     $mockClient = new MockClient([
         MockResponse::make([
@@ -71,7 +69,7 @@ test('generate service token command creates token successfully', function () {
         ->expectsOutputToContain('SCALPELS_WEBHOOK_SECRET');
 });
 
-test('generate service token command validates environment type', function () {
+test('generate service token command validates environment type', function (): void {
     $this->artisan('scalpels:generate-service-token', [
         'environment' => 'production',
         'type' => 'invalid-type',
@@ -80,7 +78,7 @@ test('generate service token command validates environment type', function () {
         ->expectsOutput('Environment type must be one of: production, staging, preview, development, testing');
 });
 
-test('generate service token command handles 2FA required error', function () {
+test('generate service token command handles 2FA required error', function (): void {
     // Mock 2FA required response
     $mockClient = new MockClient([
         MockResponse::make([
@@ -101,7 +99,7 @@ test('generate service token command handles 2FA required error', function () {
         ->expectsOutputToContain('https://test.scalpels.app/settings');
 });
 
-test('generate service token command handles invalid operation error', function () {
+test('generate service token command handles invalid operation error', function (): void {
     // Mock invalid operation response (service token creating service token)
     $mockClient = new MockClient([
         MockResponse::make([
@@ -121,7 +119,7 @@ test('generate service token command handles invalid operation error', function 
         ->expectsOutput('Service tokens cannot create other service tokens. Please use an account token.');
 });
 
-test('generate service token command supports custom name', function () {
+test('generate service token command supports custom name', function (): void {
     // Mock successful service token creation
     $mockClient = new MockClient([
         MockResponse::make([
@@ -149,7 +147,7 @@ test('generate service token command supports custom name', function () {
         ->expectsOutputToContain('Custom Staging Token');
 });
 
-test('generate service token command warns to store credentials securely', function () {
+test('generate service token command warns to store credentials securely', function (): void {
     // Mock successful service token creation
     $mockClient = new MockClient([
         MockResponse::make([

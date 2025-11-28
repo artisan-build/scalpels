@@ -2,20 +2,23 @@
 
 declare(strict_types=1);
 
-namespace ArtisanBuild\Scalpels\Tests\Unit;
+namespace ArtisanBuild\Scalpels\Tests\Feature;
 
 use ArtisanBuild\Scalpels\Connectors\ScalpelsConnector;
 use ArtisanBuild\Scalpels\Exceptions\AuthenticationException;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 use ArtisanBuild\Scalpels\Support\TokenRotationHandler;
+use Exception;
 use Mockery;
+use Saloon\Enums\Method;
+use Saloon\Http\Request;
 
 /**
  * Test ScalpelsConnector functionality.
  *
  * Covers Bearer token injection and response interception.
  */
-test('connector injects Bearer token from TokenManager', function () {
+test('connector injects Bearer token from TokenManager', function (): void {
     $tokenManager = Mockery::mock(TokenManager::class);
     $tokenManager->shouldReceive('resolveToken')
         ->once()
@@ -33,7 +36,7 @@ test('connector injects Bearer token from TokenManager', function () {
         ->and($headers['Authorization'])->toBe('Bearer acc_test1234567890test1234567890te');
 });
 
-test('connector throws AuthenticationException when no token available', function () {
+test('connector throws AuthenticationException when no token available', function (): void {
     $tokenManager = Mockery::mock(TokenManager::class);
     $tokenManager->shouldReceive('resolveToken')
         ->once()
@@ -45,11 +48,11 @@ test('connector throws AuthenticationException when no token available', functio
 
     $connector = new ScalpelsConnector($tokenManager, $handler);
 
-    expect(fn () => $connector->defaultHeaders())
+    expect(fn (): array => $connector->defaultHeaders())
         ->toThrow(AuthenticationException::class);
 });
 
-test('connector resolves base URL from config', function () {
+test('connector resolves base URL from config', function (): void {
     $tokenManager = Mockery::mock(TokenManager::class);
     $handler = Mockery::mock(TokenRotationHandler::class);
 
@@ -60,7 +63,7 @@ test('connector resolves base URL from config', function () {
     expect($connector->resolveBaseUrl())->toBe('https://myteam.scalpels.app');
 });
 
-test('connector registers TokenRotationHandler as response interceptor', function () {
+test('connector registers TokenRotationHandler as response interceptor', function (): void {
     $tokenManager = Mockery::mock(TokenManager::class);
     $tokenManager->shouldReceive('resolveToken')
         ->andReturn('acc_test1234567890test1234567890te');
@@ -72,9 +75,9 @@ test('connector registers TokenRotationHandler as response interceptor', functio
     $connector = new ScalpelsConnector($tokenManager, $handler);
 
     // Create a simple request to test the boot method
-    $request = new class extends \Saloon\Http\Request
+    $request = new class extends Request
     {
-        protected \Saloon\Enums\Method $method = \Saloon\Enums\Method::GET;
+        protected Method $method = Method::GET;
 
         public function resolveEndpoint(): string
         {
@@ -85,7 +88,7 @@ test('connector registers TokenRotationHandler as response interceptor', functio
     // Send a request to trigger boot
     try {
         $connector->send($request);
-    } catch (\Exception $e) {
+    } catch (Exception) {
         // We don't care if the request fails, we just need to trigger boot
     }
 

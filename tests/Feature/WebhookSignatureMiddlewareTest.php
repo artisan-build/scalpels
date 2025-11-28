@@ -7,7 +7,7 @@ use ArtisanBuild\Scalpels\Support\WebhookSigner;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-test('valid signature allows request to proceed', function () {
+test('valid signature allows request to proceed', function (): void {
     // Arrange
     $payload = json_encode(['event' => 'test', 'data' => ['foo' => 'bar']]);
     $secret = 'whsec_test_secret_key';
@@ -22,16 +22,14 @@ test('valid signature allows request to proceed', function () {
     $middleware = new VerifyWebhookSignature;
 
     // Act
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('Success', 200);
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('Success', 200));
 
     // Assert
     expect($response->getStatusCode())->toBe(200);
     expect($response->getContent())->toBe('Success');
 });
 
-test('missing signature rejects request with 401', function () {
+test('missing signature rejects request with 401', function (): void {
     // Arrange
     $payload = json_encode(['event' => 'test']);
     config()->set('scalpels.webhook_secret', 'whsec_test_secret');
@@ -42,17 +40,15 @@ test('missing signature rejects request with 401', function () {
     $middleware = new VerifyWebhookSignature;
 
     // Act
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('Success', 200);
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('Success', 200));
 
     // Assert
     expect($response->getStatusCode())->toBe(401);
-    expect(json_decode($response->getContent(), true))
+    expect(json_decode((string) $response->getContent(), true))
         ->toHaveKey('error', 'Missing webhook signature');
 });
 
-test('invalid signature rejects request with 401', function () {
+test('invalid signature rejects request with 401', function (): void {
     // Arrange
     $payload = json_encode(['event' => 'test']);
     $secret = 'whsec_test_secret';
@@ -64,17 +60,15 @@ test('invalid signature rejects request with 401', function () {
     $middleware = new VerifyWebhookSignature;
 
     // Act
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('Success', 200);
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('Success', 200));
 
     // Assert
     expect($response->getStatusCode())->toBe(401);
-    expect(json_decode($response->getContent(), true))
+    expect(json_decode((string) $response->getContent(), true))
         ->toHaveKey('error', 'Invalid webhook signature');
 });
 
-test('modified payload rejects request with 401', function () {
+test('modified payload rejects request with 401', function (): void {
     // Arrange
     $originalPayload = json_encode(['event' => 'test', 'amount' => 100]);
     $modifiedPayload = json_encode(['event' => 'test', 'amount' => 999]);
@@ -91,19 +85,17 @@ test('modified payload rejects request with 401', function () {
     $middleware = new VerifyWebhookSignature;
 
     // Act
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('Success', 200);
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('Success', 200));
 
     // Assert
     expect($response->getStatusCode())->toBe(401);
-    expect(json_decode($response->getContent(), true))
+    expect(json_decode((string) $response->getContent(), true))
         ->toHaveKey('error', 'Invalid webhook signature');
 });
 
-test('missing webhook secret configuration returns 500', function () {
+test('missing webhook secret configuration returns 500', function (): void {
     // Arrange
-    config()->set('scalpels.webhook_secret', null);
+    config()->set('scalpels.webhook_secret');
 
     $payload = json_encode(['event' => 'test']);
     $request = Request::create('/webhook', 'POST', [], [], [], [], $payload);
@@ -112,12 +104,10 @@ test('missing webhook secret configuration returns 500', function () {
     $middleware = new VerifyWebhookSignature;
 
     // Act
-    $response = $middleware->handle($request, function ($req) {
-        return new Response('Success', 200);
-    });
+    $response = $middleware->handle($request, fn ($req): Response => new Response('Success', 200));
 
     // Assert
     expect($response->getStatusCode())->toBe(500);
-    expect(json_decode($response->getContent(), true))
+    expect(json_decode((string) $response->getContent(), true))
         ->toHaveKey('error', 'Webhook secret not configured');
 });

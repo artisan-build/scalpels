@@ -6,7 +6,7 @@ use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 use ArtisanBuild\Scalpels\Tests\TestCase;
 
-uses(TestCase::class)->in('Feature', 'Unit');
+uses(TestCase::class)->in('Feature', 'Integration', 'Unit');
 
 /**
  * Setup temporary TokenManager for tests.

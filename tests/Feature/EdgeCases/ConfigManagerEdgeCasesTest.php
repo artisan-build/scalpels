@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->tempDir = sys_get_temp_dir().'/scalpels-config-'.uniqid();
     mkdir($this->tempDir);
     $this->configManager = new ConfigManager($this->tempDir);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     if (is_dir($this->tempDir)) {
         // Clean up all files and subdirectories
         $files = new RecursiveIteratorIterator(
@@ -27,7 +27,7 @@ afterEach(function () {
     }
 });
 
-test('get returns null for corrupted .env file', function () {
+test('get returns null for corrupted .env file', function (): void {
     // Create corrupted .env file (binary content)
     file_put_contents("{$this->tempDir}/.env", "\x00\x01\x02\x03\x04");
 
@@ -35,7 +35,7 @@ test('get returns null for corrupted .env file', function () {
     expect($result)->toBeNull();
 });
 
-test('set handles extremely long values', function () {
+test('set handles extremely long values', function (): void {
     $longValue = str_repeat('a', 10000);
 
     $this->configManager->set('VERY_LONG_VALUE', $longValue);
@@ -44,7 +44,7 @@ test('set handles extremely long values', function () {
     expect($retrieved)->toBe($longValue);
 });
 
-test('set handles values with special characters', function () {
+test('set handles values with special characters', function (): void {
     $specialValues = [
         'EQUALS' => 'Value=with=equals=signs',
         'HASH' => 'Value#with#hash#signs',
@@ -56,13 +56,13 @@ test('set handles values with special characters', function () {
     }
 
     // Verify all values are stored and retrieved correctly
-    foreach ($specialValues as $key => $value) {
+    foreach (array_keys($specialValues) as $key) {
         $retrieved = $this->configManager->get($key);
         expect($retrieved)->not->toBeNull();
     }
 });
 
-test('setMultiple rolls back on partial failure', function () {
+test('setMultiple rolls back on partial failure', function (): void {
     // Create initial .env
     file_put_contents("{$this->tempDir}/.env", "EXISTING_KEY=original_value\n");
 
@@ -75,7 +75,7 @@ test('setMultiple rolls back on partial failure', function () {
             'NEW_KEY_1' => 'value1',
             'NEW_KEY_2' => 'value2',
         ]);
-    } catch (Exception $e) {
+    } catch (Exception) {
         // Expected to fail due to read-only .env.example
     }
 
@@ -87,7 +87,7 @@ test('setMultiple rolls back on partial failure', function () {
     chmod("{$this->tempDir}/.env.example", 0644);
 });
 
-test('has returns false for keys in comments', function () {
+test('has returns false for keys in comments', function (): void {
     file_put_contents("{$this->tempDir}/.env", <<<'ENV'
 # COMMENTED_KEY=value
 ENV
