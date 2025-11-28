@@ -5,7 +5,7 @@ declare(strict_types=1);
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Use temporary directory for all filesystem operations
     $this->tempDir = sys_get_temp_dir().'/scalpels-integration-'.uniqid();
     mkdir($this->tempDir);
@@ -16,17 +16,13 @@ beforeEach(function () {
     file_put_contents("{$this->tempDir}/.env/.env.example", "APP_NAME=TestApp\n");
 
     // Bind TokenManager with custom home directory
-    $this->app->singleton(TokenManager::class, function () {
-        return new TokenManager($this->tempDir);
-    });
+    $this->app->singleton(TokenManager::class, fn (): TokenManager => new TokenManager($this->tempDir));
 
     // Bind ConfigManager with custom env path
-    $this->app->singleton(ConfigManager::class, function () {
-        return new ConfigManager("{$this->tempDir}/.env");
-    });
+    $this->app->singleton(ConfigManager::class, fn (): ConfigManager => new ConfigManager("{$this->tempDir}/.env"));
 });
 
-afterEach(function () {
+afterEach(function (): void {
     // Cleanup temp directory
     if (is_dir($this->tempDir)) {
         $files = new RecursiveIteratorIterator(
@@ -43,7 +39,7 @@ afterEach(function () {
     }
 });
 
-test('complete authentication workflow stores and retrieves token', function () {
+test('complete authentication workflow stores and retrieves token', function (): void {
     // Step 1: Install command configures project
     $configManager = $this->app->make(ConfigManager::class);
     $configManager->set('SCALPELS_URL', 'https://test.scalpels.app');
@@ -73,7 +69,7 @@ test('complete authentication workflow stores and retrieves token', function () 
     expect($perms)->toBe(0600);
 });
 
-test('service token generation and rotation workflow', function () {
+test('service token generation and rotation workflow', function (): void {
     // Step 1: Authenticate with account token
     $tokenManager = $this->app->make(TokenManager::class);
     $tokenManager->storeAccountToken('default', [
@@ -103,7 +99,7 @@ test('service token generation and rotation workflow', function () {
     expect($newToken)->toBe('svc_newtoken123newtoken123newtoken1234');
 });
 
-test('multiple account switching workflow', function () {
+test('multiple account switching workflow', function (): void {
     $tokenManager = $this->app->make(TokenManager::class);
 
     // Step 1: Create first account
@@ -137,21 +133,21 @@ test('multiple account switching workflow', function () {
     expect($accounts)->toContain('client-one', 'client-two');
 });
 
-test('configuration file updates preserve formatting', function () {
+test('configuration file updates preserve formatting', function (): void {
     $configManager = $this->app->make(ConfigManager::class);
 
     // Step 1: Create .env with specific formatting
-    file_put_contents("{$this->tempDir}/.env/.env", <<<'ENV'
-# Application Configuration
-APP_NAME="Test App"
-APP_ENV=local
+    file_put_contents("{$this->tempDir}/.env/.env", <<<'ENV_WRAP'
+    # Application Configuration
+    APP_NAME="Test App"
+    APP_ENV=local
 
-# Database Configuration
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+    # Database Configuration
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
 
-# Scalpels Configuration will be added below
-ENV
+    # Scalpels Configuration will be added below
+    ENV_WRAP
     );
 
     // Step 2: Add Scalpels configuration

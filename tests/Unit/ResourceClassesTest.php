@@ -37,8 +37,8 @@ test('AccountTokenResource parses account token creation response', function ():
 
     expect($resource->id)->toBe(123)
         ->and($resource->token)->toBe('acc_test1234567890test1234567890te')
-        ->and($resource->expiresAt)->toBe('2026-02-08T10:30:00Z')
-        ->and($resource->createdAt)->toBe('2025-11-10T10:30:00Z');
+        ->and($resource->expiresAt->toIso8601String())->toBe('2026-02-08T10:30:00+00:00')
+        ->and($resource->createdAt->toIso8601String())->toBe('2025-11-10T10:30:00+00:00');
 });
 
 test('ServiceAccountResource parses service token creation response', function (): void {

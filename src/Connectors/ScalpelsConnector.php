@@ -7,6 +7,7 @@ namespace ArtisanBuild\Scalpels\Connectors;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 use ArtisanBuild\Scalpels\Support\TokenRotationHandler;
 use Saloon\Http\Connector;
+use Saloon\Http\PendingRequest;
 use Saloon\Traits\Plugins\AcceptsJson;
 
 /**
@@ -62,7 +63,7 @@ class ScalpelsConnector extends Connector
      *
      * Registers TokenRotationHandler as response interceptor.
      */
-    public function boot(\Saloon\Http\PendingRequest $pendingRequest): void
+    public function boot(PendingRequest $pendingRequest): void
     {
         $pendingRequest->middleware()->onResponse($this->tokenRotationHandler);
     }

@@ -7,6 +7,7 @@ namespace ArtisanBuild\Scalpels\Commands;
 use ArtisanBuild\Scalpels\Exceptions\AuthenticationException;
 use ArtisanBuild\Scalpels\Requests\CreateAccountTokenRequest;
 use ArtisanBuild\Scalpels\Resources\AccountTokenResource;
+use Exception;
 use Saloon\Exceptions\Request\RequestException;
 
 /**
@@ -116,7 +117,7 @@ class AuthCommand extends ScalpelsCommand
         } catch (AuthenticationException $e) {
             // This shouldn't happen for auth command, but handle it gracefully
             return $this->handleGenericError($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleGenericError($e->getMessage());
         }
     }

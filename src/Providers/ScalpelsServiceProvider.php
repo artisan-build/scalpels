@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace ArtisanBuild\Scalpels\Providers;
 
+use ArtisanBuild\Scalpels\Commands\AuthCommand;
+use ArtisanBuild\Scalpels\Commands\GenerateServiceTokenCommand;
+use ArtisanBuild\Scalpels\Commands\InstallCommand;
+use ArtisanBuild\Scalpels\Commands\SwitchAccountCommand;
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 use Illuminate\Support\ServiceProvider;
@@ -31,14 +35,10 @@ class ScalpelsServiceProvider extends ServiceProvider
         );
 
         // Bind TokenManager as singleton for token resolution and storage
-        $this->app->singleton(TokenManager::class, function ($app) {
-            return new TokenManager;
-        });
+        $this->app->singleton(fn ($app): TokenManager => new TokenManager);
 
         // Bind ConfigManager as singleton for .env file operations
-        $this->app->singleton(ConfigManager::class, function ($app) {
-            return new ConfigManager;
-        });
+        $this->app->singleton(fn ($app): ConfigManager => new ConfigManager);
     }
 
     /**
@@ -62,10 +62,10 @@ class ScalpelsServiceProvider extends ServiceProvider
         // Register commands when running in console
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \ArtisanBuild\Scalpels\Commands\InstallCommand::class,
-                \ArtisanBuild\Scalpels\Commands\AuthCommand::class,
-                \ArtisanBuild\Scalpels\Commands\SwitchAccountCommand::class,
-                \ArtisanBuild\Scalpels\Commands\GenerateServiceTokenCommand::class,
+                InstallCommand::class,
+                AuthCommand::class,
+                SwitchAccountCommand::class,
+                GenerateServiceTokenCommand::class,
             ]);
         }
     }

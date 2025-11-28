@@ -6,6 +6,7 @@ namespace ArtisanBuild\Scalpels\Support;
 
 use Illuminate\Support\Facades\Log;
 use Saloon\Contracts\Response;
+use Throwable;
 
 /**
  * TokenRotationHandler intercepts Saloon responses to detect and handle token rotation.
@@ -80,7 +81,7 @@ class TokenRotationHandler
                 'token_prefix' => substr($newToken, 0, 7),
                 'secret_prefix' => substr($newWebhookSecret, 0, 9),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log error but don't throw - allow response to continue
             Log::error('Failed to process token rotation', [
                 'error' => $e->getMessage(),

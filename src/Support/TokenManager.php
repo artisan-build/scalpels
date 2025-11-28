@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace ArtisanBuild\Scalpels\Support;
 
 use ArtisanBuild\Scalpels\Exceptions\InvalidTokenException;
+use Illuminate\Support\Facades\Request;
+use RuntimeException;
 
 /**
  * TokenManager handles account token storage and resolution.
@@ -17,7 +19,7 @@ class TokenManager
     /**
      * Home directory path for token storage.
      */
-    private string $homeDir;
+    private readonly string $homeDir;
 
     /**
      * Create a new TokenManager instance.
@@ -26,7 +28,7 @@ class TokenManager
      */
     public function __construct(?string $homeDir = null)
     {
-        $this->homeDir = $homeDir ?? ($_SERVER['HOME'] ?? $_SERVER['USERPROFILE'] ?? sys_get_temp_dir());
+        $this->homeDir = $homeDir ?? (Request::server('HOME') ?? Request::server('USERPROFILE') ?? sys_get_temp_dir());
     }
 
     /**
@@ -63,7 +65,7 @@ class TokenManager
     public function storeAccountToken(string $name, array $tokenData): void
     {
         // Validate token format
-        if (! isset($tokenData['token']) || ! str_starts_with($tokenData['token'], 'acc_')) {
+        if (! isset($tokenData['token']) || ! str_starts_with((string) $tokenData['token'], 'acc_')) {
             throw new InvalidTokenException('Account token must start with acc_');
         }
 
@@ -80,13 +82,13 @@ class TokenManager
         // Open file handle for atomic write
         $handle = fopen($tempPath, 'w');
         if ($handle === false) {
-            throw new \RuntimeException("Failed to open file for writing: {$tempPath}");
+            throw new RuntimeException("Failed to open file for writing: {$tempPath}");
         }
 
         try {
             // Acquire exclusive lock
             if (! flock($handle, LOCK_EX)) {
-                throw new \RuntimeException("Failed to acquire lock on file: {$tempPath}");
+                throw new RuntimeException("Failed to acquire lock on file: {$tempPath}");
             }
 
             // Write JSON data
@@ -165,7 +167,7 @@ class TokenManager
 
         // Verify account exists
         if (! file_exists("{$scalpelsDir}/{$targetFile}")) {
-            throw new \RuntimeException("Account '{$name}' does not exist");
+            throw new RuntimeException("Account '{$name}' does not exist");
         }
 
         // Remove existing symlink if present

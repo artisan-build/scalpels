@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace ArtisanBuild\Scalpels\Commands;
 
-use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\Date;
 
 /**
  * Switch between stored Scalpels accounts.
@@ -38,7 +39,7 @@ class SwitchAccountCommand extends ScalpelsCommand
         // Get all accounts
         $accounts = $tokenManager->listAccounts();
 
-        if (empty($accounts)) {
+        if ($accounts === []) {
             $this->failure('No accounts found. Please run: php artisan scalpels:auth');
 
             return self::FAILURE;
@@ -76,14 +77,14 @@ class SwitchAccountCommand extends ScalpelsCommand
             // Display token info
             $tokenData = $tokenManager->getAccountToken($account);
             if ($tokenData && isset($tokenData['expires_at'])) {
-                $expiresAt = Carbon::parse($tokenData['expires_at']);
+                $expiresAt = Date::parse($tokenData['expires_at']);
                 $this->info("Expires: {$expiresAt->toDateString()}");
             }
 
             $this->newLine();
 
             return self::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->failure("Failed to switch account: {$e->getMessage()}");
 
             return self::FAILURE;

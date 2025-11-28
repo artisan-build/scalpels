@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ArtisanBuild\Scalpels\Resources;
 
+use Carbon\Carbon;
 use Saloon\Http\Response;
 
 /**
@@ -19,8 +20,8 @@ readonly class AccountTokenResource
     public function __construct(
         public int $id,
         public string $token,
-        public ?string $expiresAt,
-        public string $createdAt,
+        public ?Carbon $expiresAt,
+        public Carbon $createdAt,
     ) {}
 
     /**
@@ -33,8 +34,8 @@ readonly class AccountTokenResource
         return new self(
             id: $data['id'],
             token: $data['token'],
-            expiresAt: $data['expires_at'] ?? null,
-            createdAt: $data['created_at'],
+            expiresAt: isset($data['expires_at']) ? Carbon::parse($data['expires_at']) : null,
+            createdAt: Carbon::parse($data['created_at']),
         );
     }
 }

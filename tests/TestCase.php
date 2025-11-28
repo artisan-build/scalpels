@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace ArtisanBuild\Scalpels\Tests;
 
 use ArtisanBuild\Scalpels\Providers\ScalpelsServiceProvider;
+use ArtisanBuild\Scalpels\Support\ConfigManager;
+use ArtisanBuild\Scalpels\Support\TokenManager;
+use Illuminate\Log\LogServiceProvider;
+use Monolog\Handler\NullHandler;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 /**
@@ -23,7 +27,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            \Illuminate\Log\LogServiceProvider::class,
+            LogServiceProvider::class,
             ScalpelsServiceProvider::class,
         ];
     }
@@ -49,7 +53,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('logging.default', 'null');
         $app['config']->set('logging.channels.null', [
             'driver' => 'monolog',
-            'handler' => \Monolog\Handler\NullHandler::class,
+            'handler' => NullHandler::class,
         ]);
     }
 
@@ -64,8 +68,8 @@ abstract class TestCase extends Orchestra
         mkdir($tempDir);
 
         $this->app->singleton(
-            \ArtisanBuild\Scalpels\Support\TokenManager::class,
-            fn (): \ArtisanBuild\Scalpels\Support\TokenManager => new \ArtisanBuild\Scalpels\Support\TokenManager($tempDir)
+            TokenManager::class,
+            fn (): TokenManager => new TokenManager($tempDir)
         );
 
         return [
@@ -100,8 +104,8 @@ abstract class TestCase extends Orchestra
         file_put_contents($envExamplePath, "APP_NAME=\n");
 
         $this->app->singleton(
-            \ArtisanBuild\Scalpels\Support\ConfigManager::class,
-            fn (): \ArtisanBuild\Scalpels\Support\ConfigManager => new \ArtisanBuild\Scalpels\Support\ConfigManager($tempDir)
+            ConfigManager::class,
+            fn (): ConfigManager => new ConfigManager($tempDir)
         );
 
         return [

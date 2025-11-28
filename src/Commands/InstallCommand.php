@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ArtisanBuild\Scalpels\Commands;
 
+use Exception;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -85,7 +86,7 @@ class InstallCommand extends ScalpelsCommand
             $this->newLine();
 
             return self::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->failure("Failed to write configuration: {$e->getMessage()}");
 
             return self::FAILURE;

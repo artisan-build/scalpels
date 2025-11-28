@@ -18,7 +18,7 @@ function setupTempTokenManager(): array
     $tempDir = sys_get_temp_dir().'/scalpels-test-'.uniqid();
     mkdir($tempDir);
 
-    test()->app->singleton(
+    app()->singleton(
         TokenManager::class,
         fn (): TokenManager => new TokenManager($tempDir)
     );
@@ -54,7 +54,7 @@ function setupTempConfigManager(): array
     file_put_contents($envPath, "APP_NAME=TestApp\n");
     file_put_contents($envExamplePath, "APP_NAME=\n");
 
-    test()->app->singleton(
+    app()->singleton(
         ConfigManager::class,
         fn (): ConfigManager => new ConfigManager($tempDir)
     );

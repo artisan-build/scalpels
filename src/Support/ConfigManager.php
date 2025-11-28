@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ArtisanBuild\Scalpels\Support;
 
+use RuntimeException;
+
 /**
  * ConfigManager handles .env file reading and atomic updates.
  *
@@ -15,7 +17,7 @@ class ConfigManager
     /**
      * Base directory path for .env files.
      */
-    private string $basePath;
+    private readonly string $basePath;
 
     /**
      * Create a new ConfigManager instance.
@@ -49,7 +51,7 @@ class ConfigManager
             $line = trim($line);
 
             // Skip comments and empty lines
-            if (empty($line) || str_starts_with($line, '#')) {
+            if ($line === '' || $line === '0' || str_starts_with($line, '#')) {
                 continue;
             }
 
@@ -139,7 +141,7 @@ class ConfigManager
             $trimmedLine = trim($line);
 
             // Preserve comments and empty lines
-            if (empty($trimmedLine) || str_starts_with($trimmedLine, '#')) {
+            if ($trimmedLine === '' || $trimmedLine === '0' || str_starts_with($trimmedLine, '#')) {
                 $updatedLines[] = $line;
 
                 continue;
@@ -155,14 +157,12 @@ class ConfigManager
                     $newValue = $this->quoteValueIfNeeded($values[$lineKey]);
                     $updatedLines[] = "{$lineKey}={$newValue}";
                     $processedKeys[] = $lineKey;
-                } else {
+                } elseif ($preserveValues) {
                     // Keep existing line
-                    if ($preserveValues) {
-                        $updatedLines[] = $line;
-                    } else {
-                        // For .env.example, clear the value
-                        $updatedLines[] = "{$lineKey}=";
-                    }
+                    $updatedLines[] = $line;
+                } else {
+                    // For .env.example, clear the value
+                    $updatedLines[] = "{$lineKey}=";
                 }
             } else {
                 // Keep line as-is
@@ -183,14 +183,14 @@ class ConfigManager
         $newContent = implode("\n", $updatedLines);
 
         if (file_put_contents($tempPath, $newContent) === false) {
-            throw new \RuntimeException("Failed to write to temp file: {$tempPath}");
+            throw new RuntimeException("Failed to write to temp file: {$tempPath}");
         }
 
         // Atomic rename
         if (! rename($tempPath, $filePath)) {
             @unlink($tempPath);
 
-            throw new \RuntimeException("Failed to rename temp file to: {$filePath}");
+            throw new RuntimeException("Failed to rename temp file to: {$filePath}");
         }
     }
 

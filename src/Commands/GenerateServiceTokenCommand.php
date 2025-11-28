@@ -6,6 +6,7 @@ namespace ArtisanBuild\Scalpels\Commands;
 
 use ArtisanBuild\Scalpels\Requests\CreateServiceTokenRequest;
 use ArtisanBuild\Scalpels\Resources\ServiceAccountResource;
+use Exception;
 use Saloon\Exceptions\Request\RequestException;
 
 /**
@@ -16,6 +17,13 @@ use Saloon\Exceptions\Request\RequestException;
  */
 class GenerateServiceTokenCommand extends ScalpelsCommand
 {
+    /**
+     * Valid environment types.
+     *
+     * @var array<string>
+     */
+    private const VALID_TYPES = ['production', 'staging', 'preview', 'development', 'testing'];
+
     /**
      * The name and signature of the console command.
      *
@@ -32,13 +40,6 @@ class GenerateServiceTokenCommand extends ScalpelsCommand
      * @var string
      */
     protected $description = 'Generate a service token for deployed environments';
-
-    /**
-     * Valid environment types.
-     *
-     * @var array<string>
-     */
-    private const VALID_TYPES = ['production', 'staging', 'preview', 'development', 'testing'];
 
     /**
      * Execute the console command.
@@ -125,7 +126,7 @@ class GenerateServiceTokenCommand extends ScalpelsCommand
             }
 
             return $this->handleGenericError($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->handleGenericError($e->getMessage());
         }
     }
