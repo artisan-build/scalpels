@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ArtisanBuild\Scalpels\Resources;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 use Saloon\Http\Response;
 
 /**
@@ -34,8 +35,8 @@ readonly class AccountTokenResource
         return new self(
             id: $data['id'],
             token: $data['token'],
-            expiresAt: isset($data['expires_at']) ? Carbon::parse($data['expires_at']) : null,
-            createdAt: Carbon::parse($data['created_at']),
+            expiresAt: isset($data['expires_at']) ? Date::parse($data['expires_at']) : null,
+            createdAt: Date::parse($data['created_at']),
         );
     }
 }

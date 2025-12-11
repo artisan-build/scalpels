@@ -7,6 +7,7 @@ namespace ArtisanBuild\Scalpels\Commands;
 use ArtisanBuild\Scalpels\Exceptions\AuthenticationException;
 use ArtisanBuild\Scalpels\Requests\CreateAccountTokenRequest;
 use ArtisanBuild\Scalpels\Resources\AccountTokenResource;
+use Carbon\Carbon;
 use Exception;
 use Saloon\Exceptions\Request\RequestException;
 
@@ -91,7 +92,7 @@ class AuthCommand extends ScalpelsCommand
             $this->newLine();
             $this->info("Account: {$name}");
 
-            if ($accountToken->expiresAt) {
+            if ($accountToken->expiresAt instanceof Carbon) {
                 $this->info("Expires: {$accountToken->expiresAt->toDateString()}");
             } else {
                 $this->info('Expires: Never');

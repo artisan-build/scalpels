@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ArtisanBuild\Scalpels\Tests\Feature;
 
 use ArtisanBuild\Scalpels\Connectors\ScalpelsConnector;
-use ArtisanBuild\Scalpels\Exceptions\AuthenticationException;
 use ArtisanBuild\Scalpels\Support\TokenManager;
 use ArtisanBuild\Scalpels\Support\TokenRotationHandler;
 use Exception;
