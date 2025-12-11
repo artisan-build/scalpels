@@ -8,8 +8,10 @@ use ArtisanBuild\Scalpels\Commands\AuthCommand;
 use ArtisanBuild\Scalpels\Commands\GenerateServiceTokenCommand;
 use ArtisanBuild\Scalpels\Commands\InstallCommand;
 use ArtisanBuild\Scalpels\Commands\SwitchAccountCommand;
+use ArtisanBuild\Scalpels\Logging\ScribeHandler;
 use ArtisanBuild\Scalpels\Support\ConfigManager;
 use ArtisanBuild\Scalpels\Support\TokenManager;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -58,6 +60,15 @@ class ScalpelsServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../routes/scalpels.php' => base_path('routes/scalpels.php'),
         ], 'scalpels-routes');
+
+        // Register custom Scribe log driver
+        Log::extend('scribe', fn ($app, array $config): ScribeHandler => new ScribeHandler(
+            token: $config['token'] ?? '',
+            projectId: $config['project_id'] ?? '',
+            environment: $config['environment'] ?? '',
+            url: $config['url'] ?? '',
+            level: $config['level'] ?? 'debug'
+        ));
 
         // Register commands when running in console
         if ($this->app->runningInConsole()) {
