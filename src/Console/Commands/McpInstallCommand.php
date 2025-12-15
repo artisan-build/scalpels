@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Scalpels\Console\Commands;
 
-use Illuminate\Support\Facades\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Request;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(
@@ -58,6 +58,7 @@ class McpInstallCommand extends Command
         // Check if Scalpels is already configured
         if (isset($config['mcpServers']['scalpels']) && ! $this->confirm('Scalpels MCP server is already configured. Overwrite?')) {
             $this->components->info('Installation cancelled');
+
             return static::SUCCESS;
         }
 

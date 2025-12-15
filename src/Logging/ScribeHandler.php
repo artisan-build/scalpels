@@ -41,6 +41,45 @@ class ScribeHandler extends AbstractProcessingHandler
     }
 
     /**
+     * Flush buffered logs to API.
+     */
+    public function flush(): void
+    {
+        if ($this->buffer === []) {
+            return;
+        }
+
+        $logs = array_values($this->buffer);
+
+        // Respect batch limit
+        if (count($logs) > $this->batchLimit) {
+            $logs = array_slice($logs, 0, $this->batchLimit);
+        }
+
+        try {
+            Http::withToken($this->token)
+                ->timeout(5)
+                ->post("{$this->url}/api/v1/scribe/logs", [
+                    'project_id' => $this->projectId,
+                    'environment' => $this->environment,
+                    'logs' => $logs,
+                ]);
+        } catch (Throwable) {
+            // Silent failure - never crash the application
+        }
+
+        $this->buffer = [];
+    }
+
+    /**
+     * Close the handler and flush remaining logs.
+     */
+    public function close(): void
+    {
+        $this->flush();
+    }
+
+    /**
      * Register application termination callback.
      */
     protected function registerShutdownFunction(): void
@@ -88,44 +127,5 @@ class ScribeHandler extends AbstractProcessingHandler
     protected function getDeduplicationKey(LogRecord $record): string
     {
         return $record->level->getName().'::'.$record->message;
-    }
-
-    /**
-     * Flush buffered logs to API.
-     */
-    public function flush(): void
-    {
-        if ($this->buffer === []) {
-            return;
-        }
-
-        $logs = array_values($this->buffer);
-
-        // Respect batch limit
-        if (count($logs) > $this->batchLimit) {
-            $logs = array_slice($logs, 0, $this->batchLimit);
-        }
-
-        try {
-            Http::withToken($this->token)
-                ->timeout(5)
-                ->post("{$this->url}/api/v1/scribe/logs", [
-                    'project_id' => $this->projectId,
-                    'environment' => $this->environment,
-                    'logs' => $logs,
-                ]);
-        } catch (Throwable) {
-            // Silent failure - never crash the application
-        }
-
-        $this->buffer = [];
-    }
-
-    /**
-     * Close the handler and flush remaining logs.
-     */
-    public function close(): void
-    {
-        $this->flush();
     }
 }

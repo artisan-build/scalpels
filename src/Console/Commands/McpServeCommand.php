@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Scalpels\Console\Commands;
 
-use Laravel\Mcp\Server\Registrar;
-use Throwable;
 use Illuminate\Console\Command;
 use Laravel\Mcp\Facades\Mcp;
+use Laravel\Mcp\Server\Registrar;
 use Scalpels\Mcp\ScalpelsMcpServer;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Throwable;
 
 #[AsCommand(
     name: 'scalpels:mcp-serve',
