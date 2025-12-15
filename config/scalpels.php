@@ -91,4 +91,37 @@ return [
     |
     */
     'debug' => (bool) env('SCALPELS_DEBUG', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Environment Name
+    |--------------------------------------------------------------------------
+    |
+    | The environment name to use for Intercept email captures.
+    | Defaults to the application environment (local, staging, production).
+    | Set via SCALPELS_ENVIRONMENT environment variable.
+    |
+    */
+    'environment' => env('SCALPELS_ENVIRONMENT', env('APP_ENV', 'production')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Intercept Mail Driver Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the Intercept mail driver. When the 'intercept' mail
+    | driver is active, all emails will be captured and sent to your Scalpels
+    | portal for review instead of being delivered.
+    |
+    | To use this driver, set MAIL_MAILER=intercept in your .env file.
+    | Requires SCALPELS_URL, SCALPELS_PROJECT, and SCALPELS_SERVICE_TOKEN
+    | to be configured.
+    |
+    | WARNING: Never use the Intercept driver in production environments.
+    | It will throw an exception if APP_ENV=production is detected.
+    |
+    */
+    'intercept' => [
+        'enabled' => env('MAIL_MAILER') === 'intercept',
+    ],
 ];

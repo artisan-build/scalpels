@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Scalpels;
 
+use ArtisanBuild\Scalpels\Connectors\ScalpelsConnector;
+use ArtisanBuild\Scalpels\Intercept\InterceptTransport;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Mcp\Facades\Mcp;
 use Scalpels\Console\Commands\McpInstallCommand;
@@ -37,5 +40,26 @@ class ScalpelsServiceProvider extends ServiceProvider
                 McpInstallCommand::class,
             ]);
         }
+
+        // Register Intercept mail driver
+        $this->registerInterceptMailDriver();
+    }
+
+    /**
+     * Register the Intercept mail driver.
+     */
+    protected function registerInterceptMailDriver(): void
+    {
+        Mail::extend('intercept', function (array $config = []): InterceptTransport {
+            $connector = $this->app->make(ScalpelsConnector::class);
+            $projectId = config('scalpels.project_id');
+            $environment = config('scalpels.environment', config('app.env'));
+
+            return new InterceptTransport(
+                connector: $connector,
+                projectId: $projectId,
+                environment: $environment,
+            );
+        });
     }
 }
