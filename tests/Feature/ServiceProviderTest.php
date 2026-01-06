@@ -30,8 +30,8 @@ test('service provider registers configuration file', function (): void {
 });
 
 test('service provider binds TokenManager as singleton', function (): void {
-    $instance1 = app(TokenManager::class);
-    $instance2 = app(TokenManager::class);
+    $instance1 = resolve(TokenManager::class);
+    $instance2 = resolve(TokenManager::class);
 
     expect($instance1)
         ->toBeInstanceOf(TokenManager::class)
@@ -39,8 +39,8 @@ test('service provider binds TokenManager as singleton', function (): void {
 });
 
 test('service provider binds ConfigManager as singleton', function (): void {
-    $instance1 = app(ConfigManager::class);
-    $instance2 = app(ConfigManager::class);
+    $instance1 = resolve(ConfigManager::class);
+    $instance2 = resolve(ConfigManager::class);
 
     expect($instance1)
         ->toBeInstanceOf(ConfigManager::class)

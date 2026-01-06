@@ -30,7 +30,7 @@ class McpServeCommand extends Command
             Mcp::local('scalpels', $server);
 
             // Start the server
-            $registrar = app(Registrar::class);
+            $registrar = resolve(Registrar::class);
             $serverInstance = $registrar->getLocalServer('scalpels');
 
             if ($serverInstance === null) {

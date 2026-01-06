@@ -9,8 +9,8 @@ use Saloon\Http\Faking\MockResponse;
 
 test('auth command requires configuration', function (): void {
     // Clear configuration
-    app('config')->set('scalpels.url', null);
-    app('config')->set('scalpels.project_id', null);
+    resolve('config')->set('scalpels.url', null);
+    resolve('config')->set('scalpels.project_id', null);
 
     $this->artisan('scalpels:auth')
         ->assertFailed()
@@ -35,7 +35,7 @@ test('auth command stores account token on success', function (): void {
         ], 201),
     ]);
 
-    $connector = app(ScalpelsConnector::class);
+    $connector = resolve(ScalpelsConnector::class);
     $connector->withMockClient($mockClient);
 
     $this->artisan('scalpels:auth')
@@ -46,7 +46,7 @@ test('auth command stores account token on success', function (): void {
         ->expectsOutputToContain('Authentication successful!');
 
     // Verify token was stored
-    $tokenManager = app(TokenManager::class);
+    $tokenManager = resolve(TokenManager::class);
     $tokenData = $tokenManager->getAccountToken('default');
     expect($tokenData)->not->toBeNull()
         ->and($tokenData['token'])->toBe('acc_abcdef1234567890abcdef1234567890');
