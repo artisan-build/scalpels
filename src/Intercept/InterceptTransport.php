@@ -189,6 +189,6 @@ class InterceptTransport implements TransportInterface
      */
     protected function isProduction(): bool
     {
-        return app(IsProductionEnvironment::class)->handle();
+        return resolve(IsProductionEnvironment::class)->handle();
     }
 }
